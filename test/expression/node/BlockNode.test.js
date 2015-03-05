@@ -14,7 +14,7 @@ var ResultSet = require('../../../lib/type/ResultSet');
 describe('BlockNode', function() {
 
   it ('should create a BlockNode', function () {
-    var n = new BlockNode([]);
+    var n = new BlockNode(math, []);
     assert(n instanceof BlockNode);
     assert(n instanceof Node);
     assert.equal(n.type, 'BlockNode');
@@ -25,47 +25,47 @@ describe('BlockNode', function() {
   });
 
   it ('should throw an error when adding invalid blocks', function () {
-    assert.throws(function () {new BlockNode()}, /Array expected/);
-    assert.throws(function () {new BlockNode([2])}, /Property "node" must be a Node/);
-    assert.throws(function () {new BlockNode([{node: 2, visible:true}])}, /Property "node" must be a Node/);
-    assert.throws(function () {new BlockNode([{node: new Node(), visible: 2}])}, /Property "visible" must be a boolean/);
+    assert.throws(function () {new BlockNode(math)}, /Array expected/);
+    assert.throws(function () {new BlockNode(math, [2])}, /Property "node" must be a Node/);
+    assert.throws(function () {new BlockNode(math, [{node: 2, visible:true}])}, /Property "node" must be a Node/);
+    assert.throws(function () {new BlockNode(math, [{node: new Node(), visible: 2}])}, /Property "visible" must be a boolean/);
   });
 
   it ('should compile and evaluate a BlockNode', function () {
-    var n = new BlockNode([
+    var n = new BlockNode(math, [
       {
-        node: new ConstantNode(5),
+        node: new ConstantNode(math, 5),
         visible: true
       },
       {
-        node: new AssignmentNode('foo', new ConstantNode(3)),
+        node: new AssignmentNode(math, 'foo', new ConstantNode(math, 3)),
         visible: false
       },
       {
-        node: new SymbolNode('foo'),
+        node: new SymbolNode(math, 'foo'),
         visible: true
       }
     ]);
 
     var scope = {};
-    assert.deepEqual(n.compile(math).eval(scope), new ResultSet([5, 3]));
+    assert.deepEqual(n.compile().eval(scope), new ResultSet([5, 3]));
     assert.deepEqual(scope, {foo: 3});
   });
 
   it ('expressions should be visible by default', function () {
-    var n = new BlockNode([
-      {node: new ConstantNode(5)}
+    var n = new BlockNode(math, [
+      {node: new ConstantNode(math, 5)}
     ]);
 
-    assert.deepEqual(n.compile(math).eval(), new ResultSet([5]));
+    assert.deepEqual(n.compile().eval(), new ResultSet([5]));
   });
 
   it ('should filter a BlockNode', function () {
-    var a = new ConstantNode(5);
-    var b2 = new ConstantNode(3);
-    var b = new AssignmentNode('foo', b2);
-    var c = new SymbolNode('foo');
-    var d = new BlockNode([
+    var a = new ConstantNode(math, 5);
+    var b2 = new ConstantNode(math, 3);
+    var b = new AssignmentNode(math, 'foo', b2);
+    var c = new SymbolNode(math, 'foo');
+    var d = new BlockNode(math, [
       {node: a, visible: true},
       {node: b, visible: false},
       {node: c, visible: true}
@@ -80,10 +80,10 @@ describe('BlockNode', function() {
 
   it ('should run forEach on a BlockNode', function () {
     // [x, 2]
-    var x = new SymbolNode('x');
-    var two = new ConstantNode(2);
-    var c = new OperatorNode('+', 'add', [two, x]);
-    var a = new BlockNode([
+    var x = new SymbolNode(math, 'x');
+    var two = new ConstantNode(math, 2);
+    var c = new OperatorNode(math, '+', 'add', [two, x]);
+    var a = new BlockNode(math, [
       {node: x},
       {node: c}
     ]);
@@ -104,17 +104,17 @@ describe('BlockNode', function() {
 
   it ('should map a BlockNode', function () {
     // [x, 2]
-    var x = new SymbolNode('x');
-    var two = new ConstantNode(2);
-    var c = new OperatorNode('+', 'add', [two, x]);
-    var a = new BlockNode([
+    var x = new SymbolNode(math, 'x');
+    var two = new ConstantNode(math, 2);
+    var c = new OperatorNode(math, '+', 'add', [two, x]);
+    var a = new BlockNode(math, [
       {node: x},
       {node: c}
     ]);
 
     var nodes = [];
     var paths = [];
-    var d = new ConstantNode(3);
+    var d = new ConstantNode(math, 3);
     var e = a.map(function (node, path, parent) {
       nodes.push(node);
       paths.push(path);
@@ -137,10 +137,10 @@ describe('BlockNode', function() {
   });
 
   it ('should throw an error when the map callback does not return a node', function () {
-    var x = new SymbolNode('x');
-    var two = new ConstantNode(2);
-    var c = new OperatorNode('+', 'add', [two, x]);
-    var a = new BlockNode([
+    var x = new SymbolNode(math, 'x');
+    var two = new ConstantNode(math, 2);
+    var c = new OperatorNode(math, '+', 'add', [two, x]);
+    var a = new BlockNode(math, [
       {node: x},
       {node: c}
     ]);
@@ -152,14 +152,14 @@ describe('BlockNode', function() {
 
   it ('should transform a BlockNodes parameters', function () {
     // [x, 2]
-    var b = new SymbolNode('x');
-    var c = new ConstantNode(2);
-    var a = new BlockNode([
+    var b = new SymbolNode(math, 'x');
+    var c = new ConstantNode(math, 2);
+    var a = new BlockNode(math, [
       {node: b},
       {node: c}
     ]);
 
-    var d = new ConstantNode(3);
+    var d = new ConstantNode(math, 3);
     var e = a.transform(function (node) {
       return node instanceof SymbolNode && node.name == 'x' ? d : node;
     });
@@ -171,9 +171,9 @@ describe('BlockNode', function() {
 
   it ('should transform a BlockNode itself', function () {
     // [x, 2]
-    var a = new BlockNode([]);
+    var a = new BlockNode(math, []);
 
-    var d = new ConstantNode(3);
+    var d = new ConstantNode(math, 3);
     var e = a.transform(function (node) {
       return node instanceof BlockNode ? d : node;
     });
@@ -181,9 +181,9 @@ describe('BlockNode', function() {
   });
 
   it ('should traverse a BlockNode', function () {
-    var a = new ConstantNode(1);
-    var b = new ConstantNode(2);
-    var c = new BlockNode([
+    var a = new ConstantNode(math, 1);
+    var b = new ConstantNode(math, 2);
+    var c = new BlockNode(math, [
       {node: a, visible: true},
       {node: b, visible: true}
     ]);
@@ -218,9 +218,9 @@ describe('BlockNode', function() {
 
   it ('should clone a BlockNode', function () {
     // [x, 2]
-    var b = new SymbolNode('x');
-    var c = new ConstantNode(2);
-    var a = new BlockNode([
+    var b = new SymbolNode(math, 'x');
+    var c = new ConstantNode(math, 2);
+    var a = new BlockNode(math, [
       {node: b},
       {node: c}
     ]);
@@ -237,20 +237,20 @@ describe('BlockNode', function() {
   });
 
   it ('should stringify a BlockNode', function () {
-    var n = new BlockNode([
-      {node: new ConstantNode(5), visible:true},
-      {node: new AssignmentNode('foo', new ConstantNode(3)), visible:false},
-      {node: new SymbolNode('foo'), visible:true}
+    var n = new BlockNode(math, [
+      {node: new ConstantNode(math, 5), visible:true},
+      {node: new AssignmentNode(math, 'foo', new ConstantNode(math, 3)), visible:false},
+      {node: new SymbolNode(math, 'foo'), visible:true}
     ]);
 
     assert.equal(n.toString(), '5\nfoo = 3;\nfoo');
   });
 
   it ('should LaTeX a BlockNode', function () {
-    var n = new BlockNode([
-      {node: new ConstantNode(5), visible:true},
-      {node: new AssignmentNode('foo', new ConstantNode(3)), visible:false},
-      {node: new SymbolNode('foo'), visible:true}
+    var n = new BlockNode(math, [
+      {node: new ConstantNode(math, 5), visible:true},
+      {node: new AssignmentNode(math, 'foo', new ConstantNode(math, 3)), visible:false},
+      {node: new SymbolNode(math, 'foo'), visible:true}
     ]);
 
     assert.equal(n.toTex(), '5\n{foo}={3};\nfoo');

@@ -13,12 +13,12 @@ var SymbolNode = require('../../../lib/expression/node/SymbolNode');
 describe('UpdateNode', function() {
 
   it ('should create an UpdateNode', function () {
-    var a = new SymbolNode('a');
-    var b = new ConstantNode(2);
-    var c = new ConstantNode(1);
-    var i = new IndexNode(a, [b, c]);
-    var v = new ConstantNode(5);
-    var n = new UpdateNode(i, v);
+    var a = new SymbolNode(math, 'a');
+    var b = new ConstantNode(math, 2);
+    var c = new ConstantNode(math, 1);
+    var i = new IndexNode(math, a, [b, c]);
+    var v = new ConstantNode(math, 5);
+    var n = new UpdateNode(math, i, v);
 
     assert(n instanceof UpdateNode);
     assert(n instanceof Node);
@@ -26,36 +26,36 @@ describe('UpdateNode', function() {
   });
 
   it ('should throw an error when calling without new operator', function () {
-    var a = new SymbolNode('a');
-    var b = new ConstantNode(2);
-    var c = new ConstantNode(1);
-    var i = new IndexNode(a, [b, c]);
-    var v = new ConstantNode(5);
+    var a = new SymbolNode(math, 'a');
+    var b = new ConstantNode(math, 2);
+    var c = new ConstantNode(math, 1);
+    var i = new IndexNode(math, a, [b, c]);
+    var v = new ConstantNode(math, 5);
 
     assert.throws(function () {UpdateNode(i, v)}, SyntaxError);
   });
 
   it ('should throw an error when calling with wrong arguments', function () {
-    var a = new SymbolNode('a');
-    var b = new ConstantNode(2);
-    var c = new ConstantNode(1);
-    var i = new IndexNode(a, [b, c]);
-    var v = new ConstantNode(5);
+    var a = new SymbolNode(math, 'a');
+    var b = new ConstantNode(math, 2);
+    var c = new ConstantNode(math, 1);
+    var i = new IndexNode(math, a, [b, c]);
+    var v = new ConstantNode(math, 5);
 
-    assert.throws(function () {new UpdateNode([2, 3], v)}, TypeError);
-    assert.throws(function () {new UpdateNode(i, 5)}, TypeError);
-    assert.throws(function () {new UpdateNode()}, TypeError);
+    assert.throws(function () {new UpdateNode(math, [2, 3], v)}, TypeError);
+    assert.throws(function () {new UpdateNode(math, i, 5)}, TypeError);
+    assert.throws(function () {new UpdateNode(math)}, TypeError);
   });
 
   it ('should compile an UpdateNode', function () {
-    var a = new SymbolNode('a');
+    var a = new SymbolNode(math, 'a');
     var ranges = [
-        new ConstantNode(2),
-        new ConstantNode(1)
+        new ConstantNode(math, 2),
+        new ConstantNode(math, 1)
     ];
-    var v = new ConstantNode(5);
-    var n = new UpdateNode(new IndexNode(a, ranges), v);
-    var expr = n.compile(math);
+    var v = new ConstantNode(math, 5);
+    var n = new UpdateNode(math, new IndexNode(math, a, ranges), v);
+    var expr = n.compile();
 
     var scope = {
       a: [[0, 0], [0, 0]]
@@ -67,17 +67,17 @@ describe('UpdateNode', function() {
   });
 
   it ('should compile an UpdateNode with range and context parameters', function () {
-    var a = new SymbolNode('a');
+    var a = new SymbolNode(math, 'a');
     var ranges = [
-        new ConstantNode(2),
-        new RangeNode(
-          new ConstantNode(1),
-          new SymbolNode('end')
+        new ConstantNode(math, 2),
+        new RangeNode(math,
+          new ConstantNode(math, 1),
+          new SymbolNode(math, 'end')
         )
     ];
-    var b = new SymbolNode('b');
-    var n = new UpdateNode(new IndexNode(a, ranges), b);
-    var expr = n.compile(math);
+    var b = new SymbolNode(math, 'b');
+    var n = new UpdateNode(math, new IndexNode(math, a, ranges), b);
+    var expr = n.compile();
 
     var scope = {
       a: [[0, 0], [0, 0]],
@@ -91,18 +91,18 @@ describe('UpdateNode', function() {
   });
 
   it ('should compile an UpdateNode with negative step range and context parameters', function () {
-    var a = new SymbolNode('a');
+    var a = new SymbolNode(math, 'a');
     var ranges = [
-        new ConstantNode(2),
-        new RangeNode(
-          new SymbolNode('end'),
-          new ConstantNode(1),
-          new ConstantNode(-1)
+        new ConstantNode(math, 2),
+        new RangeNode(math,
+          new SymbolNode(math, 'end'),
+          new ConstantNode(math, 1),
+          new ConstantNode(math, -1)
         )
     ];
-    var b = new SymbolNode('b');
-    var n = new UpdateNode(new IndexNode(a, ranges), b);
-    var expr = n.compile(math);
+    var b = new SymbolNode(math, 'b');
+    var n = new UpdateNode(math, new IndexNode(math, a, ranges), b);
+    var expr = n.compile();
 
     var scope = {
       a: [[0, 0], [0, 0]],
@@ -116,14 +116,14 @@ describe('UpdateNode', function() {
   });
 
   it ('should compile an UpdateNode with bignumber setting', function () {
-    var a = new SymbolNode('a');
+    var a = new SymbolNode(bigmath, 'a');
     var ranges = [
-      new ConstantNode(2),
-      new ConstantNode(1)
+      new ConstantNode(bigmath, 2),
+      new ConstantNode(bigmath, 1)
     ];
-    var v = new ConstantNode(5);
-    var n = new UpdateNode(new IndexNode(a, ranges), v);
-    var expr = n.compile(bigmath);
+    var v = new ConstantNode(bigmath, 5);
+    var n = new UpdateNode(bigmath, new IndexNode(bigmath, a, ranges), v);
+    var expr = n.compile();
 
     var scope = {
       a: [[0, 0], [0, 0]]
@@ -135,12 +135,12 @@ describe('UpdateNode', function() {
   });
 
   it ('should filter an UpdateNode', function () {
-    var a = new SymbolNode('a');
-    var b = new ConstantNode(2);
-    var c = new ConstantNode(1);
-    var i = new IndexNode(a, [b, c]);
-    var v = new ConstantNode(2);
-    var n = new UpdateNode(i, v);
+    var a = new SymbolNode(math, 'a');
+    var b = new ConstantNode(math, 2);
+    var c = new ConstantNode(math, 1);
+    var i = new IndexNode(math, a, [b, c]);
+    var v = new ConstantNode(math, 2);
+    var n = new UpdateNode(math, i, v);
 
     assert.deepEqual(n.filter(function (node) {return node instanceof UpdateNode}),  [n]);
     assert.deepEqual(n.filter(function (node) {return node instanceof SymbolNode}),  [a]);
@@ -152,12 +152,12 @@ describe('UpdateNode', function() {
 
   it ('should run forEach on an UpdateNode', function () {
     // A[1, x] = 3
-    var a = new SymbolNode('A');
-    var b = new ConstantNode(2);
-    var c = new SymbolNode('x');
-    var i = new IndexNode(a, [b, c]);
-    var v = new ConstantNode(3);
-    var n = new UpdateNode(i, v);
+    var a = new SymbolNode(math, 'A');
+    var b = new ConstantNode(math, 2);
+    var c = new SymbolNode(math, 'x');
+    var i = new IndexNode(math, a, [b, c]);
+    var v = new ConstantNode(math, 3);
+    var n = new UpdateNode(math, i, v);
 
     var nodes = [];
     var paths = [];
@@ -175,16 +175,16 @@ describe('UpdateNode', function() {
 
   it ('should map an UpdateNode', function () {
     // A[1, x] = 3
-    var a = new SymbolNode('A');
-    var b = new ConstantNode(2);
-    var c = new SymbolNode('x');
-    var i = new IndexNode(a, [b, c]);
-    var v = new ConstantNode(3);
-    var n = new UpdateNode(i, v);
+    var a = new SymbolNode(math, 'A');
+    var b = new ConstantNode(math, 2);
+    var c = new SymbolNode(math, 'x');
+    var i = new IndexNode(math, a, [b, c]);
+    var v = new ConstantNode(math, 3);
+    var n = new UpdateNode(math, i, v);
 
     var nodes = [];
     var paths = [];
-    var e = new ConstantNode(4);
+    var e = new ConstantNode(math, 4);
     var f = n.map(function (node, path, parent) {
       nodes.push(node);
       paths.push(path);
@@ -207,12 +207,12 @@ describe('UpdateNode', function() {
 
   it ('should throw an error when the map callback does not return a node', function () {
     // A[1, x] = 3
-    var a = new SymbolNode('A');
-    var b = new ConstantNode(2);
-    var c = new SymbolNode('x');
-    var i = new IndexNode(a, [b, c]);
-    var v = new ConstantNode(3);
-    var n = new UpdateNode(i, v);
+    var a = new SymbolNode(math, 'A');
+    var b = new ConstantNode(math, 2);
+    var c = new SymbolNode(math, 'x');
+    var i = new IndexNode(math, a, [b, c]);
+    var v = new ConstantNode(math, 3);
+    var n = new UpdateNode(math, i, v);
 
     assert.throws(function () {
       n.map(function () {});
@@ -221,14 +221,14 @@ describe('UpdateNode', function() {
 
   it ('should transform an UpdateNodes (nested) parameters', function () {
     // A[1, x] = 3
-    var a = new SymbolNode('A');
-    var b = new ConstantNode(2);
-    var c = new SymbolNode('x');
-    var i = new IndexNode(a, [b, c]);
-    var v = new ConstantNode(3);
-    var n = new UpdateNode(i, v);
+    var a = new SymbolNode(math, 'A');
+    var b = new ConstantNode(math, 2);
+    var c = new SymbolNode(math, 'x');
+    var i = new IndexNode(math, a, [b, c]);
+    var v = new ConstantNode(math, 3);
+    var n = new UpdateNode(math, i, v);
 
-    var e = new ConstantNode(4);
+    var e = new ConstantNode(math, 4);
     var f = n.transform(function (node) {
       return node instanceof SymbolNode && node.name == 'x' ? e : node;
     });
@@ -242,14 +242,14 @@ describe('UpdateNode', function() {
 
   it ('should transform an UpdateNodes replacement expr', function () {
     // A[1, x] = 3
-    var a = new SymbolNode('A');
-    var b = new ConstantNode(2);
-    var c = new SymbolNode('x');
-    var i = new IndexNode(a, [b, c]);
-    var v = new ConstantNode(3);
-    var n = new UpdateNode(i, v);
+    var a = new SymbolNode(math, 'A');
+    var b = new ConstantNode(math, 2);
+    var c = new SymbolNode(math, 'x');
+    var i = new IndexNode(math, a, [b, c]);
+    var v = new ConstantNode(math, 3);
+    var n = new UpdateNode(math, i, v);
 
-    var e = new ConstantNode(4);
+    var e = new ConstantNode(math, 4);
     var g = n.transform(function (node) {
       return node instanceof ConstantNode && node.value == '3' ? e : node;
     });
@@ -265,14 +265,14 @@ describe('UpdateNode', function() {
 
   it ('should transform an UpdateNode itself', function () {
     // A[1, x] = 3
-    var a = new SymbolNode('A');
-    var b = new ConstantNode(2);
-    var c = new SymbolNode('x');
-    var i = new IndexNode(a, [b, c]);
-    var v = new ConstantNode(3);
-    var n = new UpdateNode(i, v);
+    var a = new SymbolNode(math, 'A');
+    var b = new ConstantNode(math, 2);
+    var c = new SymbolNode(math, 'x');
+    var i = new IndexNode(math, a, [b, c]);
+    var v = new ConstantNode(math, 3);
+    var n = new UpdateNode(math, i, v);
 
-    var e = new ConstantNode(5);
+    var e = new ConstantNode(math, 5);
     var f = n.transform(function (node) {
       return node instanceof UpdateNode ? e : node;
     });
@@ -282,12 +282,12 @@ describe('UpdateNode', function() {
 
   it ('should clone an UpdateNode', function () {
     // A[1, x] = 3
-    var a = new SymbolNode('A');
-    var b = new ConstantNode(2);
-    var c = new SymbolNode('x');
-    var i = new IndexNode(a, [b, c]);
-    var v = new ConstantNode(3);
-    var d = new UpdateNode(i, v);
+    var a = new SymbolNode(math, 'A');
+    var b = new ConstantNode(math, 2);
+    var c = new SymbolNode(math, 'x');
+    var i = new IndexNode(math, a, [b, c]);
+    var v = new ConstantNode(math, 3);
+    var d = new UpdateNode(math, i, v);
 
     var e = d.clone();
 
@@ -299,26 +299,26 @@ describe('UpdateNode', function() {
   });
 
   it ('should stringify an UpdateNode', function () {
-    var a = new SymbolNode('a');
+    var a = new SymbolNode(math, 'a');
     var ranges = [
-      new ConstantNode(2),
-      new ConstantNode(1)
+      new ConstantNode(math, 2),
+      new ConstantNode(math, 1)
     ];
-    var v = new ConstantNode(5);
+    var v = new ConstantNode(math, 5);
 
-    var n = new UpdateNode(new IndexNode(a, ranges), v);
+    var n = new UpdateNode(math, new IndexNode(math, a, ranges), v);
     assert.equal(n.toString(), 'a[2, 1] = 5');
   });
 
   it ('should LaTeX an UpdateNode', function () {
-    var a = new SymbolNode('a');
+    var a = new SymbolNode(math, 'a');
     var ranges = [
-      new ConstantNode(2),
-      new ConstantNode(1)
+      new ConstantNode(math, 2),
+      new ConstantNode(math, 1)
     ];
-    var v = new ConstantNode(5);
+    var v = new ConstantNode(math, 5);
 
-    var n = new UpdateNode(new IndexNode(a, ranges), v);
+    var n = new UpdateNode(math, new IndexNode(math, a, ranges), v);
     assert.equal(n.toString(), 'a[2, 1] = 5');
   });
 

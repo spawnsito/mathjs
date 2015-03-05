@@ -13,31 +13,31 @@ var assert = require('assert'),
 describe('FunctionAssignmentNode', function() {
 
   it ('should create a FunctionAssignmentNode', function () {
-    var n = new FunctionAssignmentNode('f', ['x'], new ConstantNode(2));
+    var n = new FunctionAssignmentNode(math, 'f', ['x'], new ConstantNode(math, 2));
     assert(n instanceof FunctionAssignmentNode);
     assert(n instanceof Node);
     assert.equal(n.type, 'FunctionAssignmentNode');
   });
 
   it ('should throw an error when calling without new operator', function () {
-    assert.throws(function () {FunctionAssignmentNode('f', ['x'], new ConstantNode(2))}, SyntaxError);
+    assert.throws(function () {FunctionAssignmentNode('f', ['x'], new ConstantNode(math, 2))}, SyntaxError);
   });
 
   it ('should throw an error on wrong constructor arguments', function () {
-    assert.throws(function () {new FunctionAssignmentNode()}, TypeError);
-    assert.throws(function () {new FunctionAssignmentNode('a')}, TypeError);
-    assert.throws(function () {new FunctionAssignmentNode('a', ['x'])}, TypeError);
-    assert.throws(function () {new FunctionAssignmentNode('a', [2], new ConstantNode(2))}, TypeError);
-    assert.throws(function () {new FunctionAssignmentNode(null, ['x'], new ConstantNode(2))}, TypeError);
+    assert.throws(function () {new FunctionAssignmentNode(math)}, TypeError);
+    assert.throws(function () {new FunctionAssignmentNode(math, 'a')}, TypeError);
+    assert.throws(function () {new FunctionAssignmentNode(math, 'a', ['x'])}, TypeError);
+    assert.throws(function () {new FunctionAssignmentNode(math, 'a', [2], new ConstantNode(math, 2))}, TypeError);
+    assert.throws(function () {new FunctionAssignmentNode(math, null, ['x'], new ConstantNode(math, 2))}, TypeError);
   });
 
   it ('should compile a FunctionAssignmentNode', function () {
-    var a = new ConstantNode(2);
-    var x = new SymbolNode('x');
-    var o = new OperatorNode('+', 'add', [a, x]);
-    var n = new FunctionAssignmentNode('f', ['x'], o);
+    var a = new ConstantNode(math, 2);
+    var x = new SymbolNode(math, 'x');
+    var o = new OperatorNode(math, '+', 'add', [a, x]);
+    var n = new FunctionAssignmentNode(math, 'f', ['x'], o);
 
-    var expr = n.compile(math);
+    var expr = n.compile();
     var scope = {};
     var f = expr.eval(scope);
     assert.equal(typeof scope.f, 'function');
@@ -49,10 +49,10 @@ describe('FunctionAssignmentNode', function() {
   });
 
   it ('should filter a FunctionAssignmentNode', function () {
-    var a = new ConstantNode(2);
-    var x = new SymbolNode('x');
-    var o = new OperatorNode('+', 'add', [a, x]);
-    var n = new FunctionAssignmentNode('f', ['x'], o);
+    var a = new ConstantNode(math, 2);
+    var x = new SymbolNode(math, 'x');
+    var o = new OperatorNode(math, '+', 'add', [a, x]);
+    var n = new FunctionAssignmentNode(math, 'f', ['x'], o);
 
     assert.deepEqual(n.filter(function (node) {return node instanceof FunctionAssignmentNode}),  [n]);
     assert.deepEqual(n.filter(function (node) {return node instanceof SymbolNode}),    [x]);
@@ -64,20 +64,20 @@ describe('FunctionAssignmentNode', function() {
 
   it ('should throw an error when creating a FunctionAssignmentNode with a reserved keyword', function () {
     assert.throws(function () {
-      new FunctionAssignmentNode('end', ['x'], new ConstantNode(2));
+      new FunctionAssignmentNode(math, 'end', ['x'], new ConstantNode(math, 2));
     }, /Illegal function name/)
   });
 
   it ('should filter a FunctionAssignmentNode without expression', function () {
-    var e = new FunctionAssignmentNode('f', ['x'], new ConstantNode(2));
+    var e = new FunctionAssignmentNode(math, 'f', ['x'], new ConstantNode(math, 2));
 
     assert.deepEqual(e.filter(function (node) {return node instanceof FunctionAssignmentNode}),  [e]);
     assert.deepEqual(e.filter(function (node) {return node instanceof SymbolNode}),    []);
   });
 
   it ('should run forEach on a FunctionAssignmentNode', function () {
-    var a = new ConstantNode(2);
-    var n = new FunctionAssignmentNode('f', ['x'], a);
+    var a = new ConstantNode(math, 2);
+    var n = new FunctionAssignmentNode(math, 'f', ['x'], a);
 
     var nodes = [];
     var paths = [];
@@ -93,12 +93,12 @@ describe('FunctionAssignmentNode', function() {
   });
 
   it ('should map a FunctionAssignmentNode', function () {
-    var a = new ConstantNode(2);
-    var n = new FunctionAssignmentNode('f', ['x'], a);
+    var a = new ConstantNode(math, 2);
+    var n = new FunctionAssignmentNode(math, 'f', ['x'], a);
 
     var nodes = [];
     var paths = [];
-    var e = new ConstantNode(3);
+    var e = new ConstantNode(math, 3);
     var f = n.map(function (node, path, parent) {
       nodes.push(node);
       paths.push(path);
@@ -116,8 +116,8 @@ describe('FunctionAssignmentNode', function() {
   });
 
   it ('should throw an error when the map callback does not return a node', function () {
-    var a = new ConstantNode(2);
-    var n = new FunctionAssignmentNode('f', ['x'], a);
+    var a = new ConstantNode(math, 2);
+    var n = new FunctionAssignmentNode(math, 'f', ['x'], a);
 
     assert.throws(function () {
       n.map(function () {});
@@ -126,12 +126,12 @@ describe('FunctionAssignmentNode', function() {
 
   it ('should transform a FunctionAssignmentNodes (nested) parameters', function () {
     // f(x) = 2 + x
-    var a = new ConstantNode(2);
-    var x = new SymbolNode('x');
-    var c = new OperatorNode('+', 'add', [a, x]);
-    var n = new FunctionAssignmentNode('f', ['x'], c);
+    var a = new ConstantNode(math, 2);
+    var x = new SymbolNode(math, 'x');
+    var c = new OperatorNode(math, '+', 'add', [a, x]);
+    var n = new FunctionAssignmentNode(math, 'f', ['x'], c);
 
-    var e = new ConstantNode(3);
+    var e = new ConstantNode(math, 3);
     var f = n.transform(function (node) {
       return node instanceof SymbolNode && node.name == 'x' ? e : node;
     });
@@ -143,12 +143,12 @@ describe('FunctionAssignmentNode', function() {
 
   it ('should transform a FunctionAssignmentNode itself', function () {
     // f(x) = 2 + x
-    var a = new ConstantNode(2);
-    var x = new SymbolNode('x');
-    var c = new OperatorNode('+', 'add', [a, x]);
-    var n = new FunctionAssignmentNode('f', ['x'], c);
+    var a = new ConstantNode(math, 2);
+    var x = new SymbolNode(math, 'x');
+    var c = new OperatorNode(math, '+', 'add', [a, x]);
+    var n = new FunctionAssignmentNode(math, 'f', ['x'], c);
 
-    var e = new ConstantNode(5);
+    var e = new ConstantNode(math, 5);
     var f = n.transform(function (node) {
       return node instanceof FunctionAssignmentNode ? e : node;
     });
@@ -158,10 +158,10 @@ describe('FunctionAssignmentNode', function() {
 
   it ('should clone a FunctionAssignmentNode', function () {
     // f(x) = 2 + x
-    var a = new ConstantNode(2);
-    var x = new SymbolNode('x');
-    var c = new OperatorNode('+', 'add', [a, x]);
-    var d = new FunctionAssignmentNode('f', ['x'], c);
+    var a = new ConstantNode(math, 2);
+    var x = new SymbolNode(math, 'x');
+    var c = new OperatorNode(math, '+', 'add', [a, x]);
+    var d = new FunctionAssignmentNode(math, 'f', ['x'], c);
 
     var e = d.clone();
     assert(e instanceof FunctionAssignmentNode);
@@ -171,38 +171,38 @@ describe('FunctionAssignmentNode', function() {
   });
 
   it ('should stringify a FunctionAssignmentNode', function () {
-    var a = new ConstantNode(2);
-    var x = new SymbolNode('x');
-    var o = new OperatorNode('+', 'add', [a, x]);
-    var n = new FunctionAssignmentNode('f', ['x'], o);
+    var a = new ConstantNode(math, 2);
+    var x = new SymbolNode(math, 'x');
+    var o = new OperatorNode(math, '+', 'add', [a, x]);
+    var n = new FunctionAssignmentNode(math, 'f', ['x'], o);
 
     assert.equal(n.toString(), 'function f(x) = 2 + x');
   });
 
   it ('should stringify a FunctionAssignmentNode conataining an AssignmentNode', function () {
-    var a = new ConstantNode(2);
+    var a = new ConstantNode(math, 2);
 
-    var n1 = new AssignmentNode('a', a);
-    var n = new FunctionAssignmentNode('f', ['x'], n1);
+    var n1 = new AssignmentNode(math, 'a', a);
+    var n = new FunctionAssignmentNode(math, 'f', ['x'], n1);
 
     assert.equal(n.toString(), 'function f(x) = (a = 2)');
   });
 
   it ('should LaTeX a FunctionAssignmentNode', function() {
-    var a = new ConstantNode(2);
-    var x = new SymbolNode('x');
-    var o = new OperatorNode('/', 'divide', [x, a]);
-    var p = new OperatorNode('^', 'pow', [o, a]);
-    var n = new FunctionAssignmentNode('f', ['x'], p);
+    var a = new ConstantNode(math, 2);
+    var x = new SymbolNode(math, 'x');
+    var o = new OperatorNode(math, '/', 'divide', [x, a]);
+    var p = new OperatorNode(math, '^', 'pow', [o, a]);
+    var n = new FunctionAssignmentNode(math, 'f', ['x'], p);
 
     assert.equal(n.toTex(), 'f\\left({x}\\right)={\\left({\\frac{x}{2}}\\right) ^ {2}}');
   });
 
   it ('should LaTeX a FunctionAssignmentNode containing an AssignmentNode', function () {
-    var a = new ConstantNode(2);
+    var a = new ConstantNode(math, 2);
 
-    var n1 = new AssignmentNode('a', a);
-    var n = new FunctionAssignmentNode('f', ['x'], n1);
+    var n1 = new AssignmentNode(math, 'a', a);
+    var n = new FunctionAssignmentNode(math, 'f', ['x'], n1);
 
     assert.equal(n.toTex(), 'f\\left({x}\\right)=\\left({{a}={2}}\\right)');
   });

@@ -1,6 +1,7 @@
 // test IndexNode
 var assert = require('assert'),
     approx = require('../../../tools/approx'),
+    math = require('../../../index'),
     bigmath = require('../../../index').create({number: 'bignumber'}),
     Node = require('../../../lib/expression/node/Node'),
     ConstantNode = require('../../../lib/expression/node/ConstantNode'),
@@ -11,17 +12,17 @@ var assert = require('assert'),
 describe('IndexNode', function() {
 
   it ('should create a IndexNode', function () {
-    var n = new IndexNode(new Node(), []);
+    var n = new IndexNode(math, new Node(), []);
     assert(n instanceof IndexNode);
     assert(n instanceof Node);
     assert.equal(n.type, 'IndexNode');
   });
 
   it ('should throw an error when calling with wrong arguments', function () {
-    assert.throws(function () {new IndexNode()}, TypeError);
-    assert.throws(function () {new IndexNode('a', [])}, TypeError);
-    assert.throws(function () {new IndexNode(new Node, [2, 3])}, TypeError);
-    assert.throws(function () {new IndexNode(new Node, [new Node(), 3])}, TypeError);
+    assert.throws(function () {new IndexNode(math)}, TypeError);
+    assert.throws(function () {new IndexNode(math, 'a', [])}, TypeError);
+    assert.throws(function () {new IndexNode(math, new Node, [2, 3])}, TypeError);
+    assert.throws(function () {new IndexNode(math, new Node, [new Node(), 3])}, TypeError);
   });
 
   it ('should throw an error when calling without new operator', function () {
@@ -29,13 +30,13 @@ describe('IndexNode', function() {
   });
 
   it ('should compile a IndexNode', function () {
-    var a = new SymbolNode('a');
+    var a = new SymbolNode(bigmath, 'a');
     var ranges = [
-      new ConstantNode(2),
-      new ConstantNode(1)
+      new ConstantNode(bigmath, 2),
+      new ConstantNode(bigmath, 1)
     ];
-    var n = new IndexNode(a, ranges);
-    var expr = n.compile(bigmath);
+    var n = new IndexNode(bigmath, a, ranges);
+    var expr = n.compile();
 
     var scope = {
       a: [[1, 2], [3, 4]]
@@ -44,16 +45,16 @@ describe('IndexNode', function() {
   });
 
   it ('should compile a IndexNode with range and context parameters', function () {
-    var a = new SymbolNode('a');
+    var a = new SymbolNode(bigmath, 'a');
     var ranges = [
-      new ConstantNode(2),
-      new RangeNode(
-        new ConstantNode(1),
-        new SymbolNode('end')
+      new ConstantNode(bigmath, 2),
+      new RangeNode(bigmath,
+        new ConstantNode(bigmath, 1),
+        new SymbolNode(bigmath, 'end')
       )
     ];
-    var n = new IndexNode(a, ranges);
-    var expr = n.compile(bigmath);
+    var n = new IndexNode(bigmath, a, ranges);
+    var expr = n.compile();
 
     var scope = {
       a: [[1, 2], [3, 4]]
@@ -62,17 +63,17 @@ describe('IndexNode', function() {
   });
 
   it ('should compile a IndexNode with negative step range and context parameters', function () {
-    var a = new SymbolNode('a');
+    var a = new SymbolNode(bigmath, 'a');
     var ranges = [
-      new ConstantNode(2),
-      new RangeNode(
-        new SymbolNode('end'),
-        new ConstantNode(1),
-        new ConstantNode(-1)
+      new ConstantNode(bigmath, 2),
+      new RangeNode(bigmath,
+        new SymbolNode(bigmath, 'end'),
+        new ConstantNode(bigmath, 1),
+        new ConstantNode(bigmath, -1)
       )
     ];
-    var n = new IndexNode(a, ranges);
-    var expr = n.compile(bigmath);
+    var n = new IndexNode(bigmath, a, ranges);
+    var expr = n.compile();
 
     var scope = {
       a: [[1, 2], [3, 4]]
@@ -81,16 +82,16 @@ describe('IndexNode', function() {
   });
 
   it ('should compile a IndexNode with "end" both as value and in a range', function () {
-    var a = new SymbolNode('a');
+    var a = new SymbolNode(bigmath, 'a');
     var ranges = [
-      new SymbolNode('end'),
-      new RangeNode(
-        new ConstantNode(1),
-        new SymbolNode('end')
+      new SymbolNode(bigmath, 'end'),
+      new RangeNode(bigmath,
+        new ConstantNode(bigmath, 1),
+        new SymbolNode(bigmath, 'end')
       )
     ];
-    var n = new IndexNode(a, ranges);
-    var expr = n.compile(bigmath);
+    var n = new IndexNode(bigmath, a, ranges);
+    var expr = n.compile();
 
     var scope = {
       a: [[1, 2], [3, 4]]
@@ -99,11 +100,11 @@ describe('IndexNode', function() {
   });
 
   it ('should compile a IndexNode with bignumber setting', function () {
-    var a = new SymbolNode('a');
-    var b = new ConstantNode(2);
-    var c = new ConstantNode(1);
-    var n = new IndexNode(a, [b, c]);
-    var expr = n.compile(bigmath);
+    var a = new SymbolNode(bigmath, 'a');
+    var b = new ConstantNode(bigmath, 2);
+    var c = new ConstantNode(bigmath, 1);
+    var n = new IndexNode(bigmath, a, [b, c]);
+    var expr = n.compile();
 
     var scope = {
       a: [[1, 2], [3, 4]]
@@ -112,10 +113,10 @@ describe('IndexNode', function() {
   });
 
   it ('should filter an IndexNode', function () {
-    var a = new SymbolNode('a'),
-        b = new ConstantNode(2),
-        c = new ConstantNode(1);
-    var n = new IndexNode(a, [b, c]);
+    var a = new SymbolNode(math, 'a'),
+        b = new ConstantNode(math, 2),
+        c = new ConstantNode(math, 1);
+    var n = new IndexNode(math, a, [b, c]);
 
     assert.deepEqual(n.filter(function (node) {return node instanceof IndexNode}),  [n]);
     assert.deepEqual(n.filter(function (node) {return node instanceof SymbolNode}),    [a]);
@@ -126,17 +127,17 @@ describe('IndexNode', function() {
   });
 
   it ('should filter an empty IndexNode', function () {
-    var n = new IndexNode(new SymbolNode('a'), []);
+    var n = new IndexNode(math, new SymbolNode(math, 'a'), []);
 
     assert.deepEqual(n.filter(function (node) {return node instanceof IndexNode}),  [n]);
     assert.deepEqual(n.filter(function (node) {return node instanceof ConstantNode}), []);
   });
 
   it ('should run forEach on an IndexNode', function () {
-    var a = new SymbolNode('a');
-    var b = new ConstantNode(2);
-    var c = new ConstantNode(1);
-    var n = new IndexNode(a, [b, c]);
+    var a = new SymbolNode(math, 'a');
+    var b = new ConstantNode(math, 2);
+    var c = new ConstantNode(math, 1);
+    var n = new IndexNode(math, a, [b, c]);
 
     var nodes = [];
     var paths = [];
@@ -154,14 +155,14 @@ describe('IndexNode', function() {
   });
 
   it ('should map an IndexNode', function () {
-    var a = new SymbolNode('a');
-    var b = new ConstantNode(2);
-    var c = new ConstantNode(1);
-    var n = new IndexNode(a, [b, c]);
+    var a = new SymbolNode(math, 'a');
+    var b = new ConstantNode(math, 2);
+    var c = new ConstantNode(math, 1);
+    var n = new IndexNode(math, a, [b, c]);
 
     var nodes = [];
     var paths = [];
-    var e = new SymbolNode('c');
+    var e = new SymbolNode(math, 'c');
     var f = n.map(function (node, path, parent) {
       nodes.push(node);
       paths.push(path);
@@ -183,10 +184,10 @@ describe('IndexNode', function() {
   });
 
   it ('should throw an error when the map callback does not return a node', function () {
-    var a = new SymbolNode('a');
-    var b = new ConstantNode(2);
-    var c = new ConstantNode(1);
-    var n = new IndexNode(a, [b, c]);
+    var a = new SymbolNode(math, 'a');
+    var b = new ConstantNode(math, 2);
+    var c = new ConstantNode(math, 1);
+    var n = new IndexNode(math, a, [b, c]);
 
     assert.throws(function () {
       n.map(function () {});
@@ -194,12 +195,12 @@ describe('IndexNode', function() {
   });
 
   it ('should transform an IndexNodes object', function () {
-    var a = new SymbolNode('a');
-    var b = new ConstantNode(2);
-    var c = new ConstantNode(1);
-    var n = new IndexNode(a, [b, c]);
+    var a = new SymbolNode(math, 'a');
+    var b = new ConstantNode(math, 2);
+    var c = new ConstantNode(math, 1);
+    var n = new IndexNode(math, a, [b, c]);
 
-    var e = new SymbolNode('c');
+    var e = new SymbolNode(math, 'c');
     var f = n.transform(function (node) {
       return node instanceof SymbolNode ? e : node;
     });
@@ -211,12 +212,12 @@ describe('IndexNode', function() {
   });
 
   it ('should transform an IndexNodes (nested) parameters', function () {
-    var a = new SymbolNode('a');
-    var b = new ConstantNode(2);
-    var c = new ConstantNode(1);
-    var n = new IndexNode(a, [b, c]);
+    var a = new SymbolNode(math, 'a');
+    var b = new ConstantNode(math, 2);
+    var c = new ConstantNode(math, 1);
+    var n = new IndexNode(math, a, [b, c]);
 
-    var e = new SymbolNode('c');
+    var e = new SymbolNode(math, 'c');
     var f = n.transform(function (node) {
       return node instanceof ConstantNode && node.value == '1' ? e : node;
     });
@@ -228,12 +229,12 @@ describe('IndexNode', function() {
   });
 
   it ('should transform an IndexNode itself', function () {
-    var a = new SymbolNode('a');
-    var b = new ConstantNode(2);
-    var c = new ConstantNode(1);
-    var n = new IndexNode(a, [b, c]);
+    var a = new SymbolNode(math, 'a');
+    var b = new ConstantNode(math, 2);
+    var c = new ConstantNode(math, 1);
+    var n = new IndexNode(math, a, [b, c]);
 
-    var e = new ConstantNode(5);
+    var e = new ConstantNode(math, 5);
     var f = n.transform(function (node) {
       return node instanceof IndexNode ? e : node;
     });
@@ -242,10 +243,10 @@ describe('IndexNode', function() {
   });
 
   it ('should clone an IndexNode', function () {
-    var a = new SymbolNode('a');
-    var b = new ConstantNode(2);
-    var c = new ConstantNode(1);
-    var n = new IndexNode(a, [b, c]);
+    var a = new SymbolNode(math, 'a');
+    var b = new ConstantNode(math, 2);
+    var c = new ConstantNode(math, 1);
+    var n = new IndexNode(math, a, [b, c]);
 
     var d = n.clone();
     assert(d instanceof IndexNode);
@@ -258,30 +259,30 @@ describe('IndexNode', function() {
   });
 
   it ('should stringify an IndexNode', function () {
-    var a = new SymbolNode('a');
+    var a = new SymbolNode(math, 'a');
     var ranges = [
-      new ConstantNode(2),
-      new ConstantNode(1)
+      new ConstantNode(math, 2),
+      new ConstantNode(math, 1)
     ];
 
-    var n = new IndexNode(a, ranges);
+    var n = new IndexNode(math, a, ranges);
     assert.equal(n.toString(), 'a[2, 1]');
 
-    var n2 = new IndexNode(a, []);
+    var n2 = new IndexNode(math, a, []);
     assert.equal(n2.toString(), 'a[]')
   });
 
   it ('should LaTeX an IndexNode', function () {
-    var a = new SymbolNode('a');
+    var a = new SymbolNode(math, 'a');
     var ranges = [
-      new ConstantNode(2),
-      new ConstantNode(1)
+      new ConstantNode(math, 2),
+      new ConstantNode(math, 1)
     ];
 
-    var n = new IndexNode(a, ranges);
+    var n = new IndexNode(math, a, ranges);
     assert.equal(n.toTex(), 'a[2, 1]');
 
-    var n2 = new IndexNode(a, []);
+    var n2 = new IndexNode(math, a, []);
     assert.equal(n2.toTex(), 'a[]')
   });
 

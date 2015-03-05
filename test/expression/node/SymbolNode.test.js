@@ -9,7 +9,7 @@ var assert = require('assert'),
 describe('SymbolNode', function() {
 
   it ('should create a SymbolNode', function () {
-    var n = new SymbolNode('sqrt');
+    var n = new SymbolNode(math, 'sqrt');
     assert(n instanceof SymbolNode);
     assert(n instanceof Node);
     assert.equal(n.type, 'SymbolNode');
@@ -20,32 +20,32 @@ describe('SymbolNode', function() {
   });
 
   it ('should throw an error when calling with wrong arguments', function () {
-    assert.throws(function () {new SymbolNode()}, TypeError);
-    assert.throws(function () {new SymbolNode(2)}, TypeError);
+    assert.throws(function () {new SymbolNode(math)}, TypeError);
+    assert.throws(function () {new SymbolNode(math, 2)}, TypeError);
   });
 
   it ('should throw an error when evaluating an undefined symbol', function () {
     var scope = {};
-    var s = new SymbolNode('foo');
-    assert.throws(function () {s.compile(math).eval(scope)}, Error);
+    var s = new SymbolNode(math, 'foo');
+    assert.throws(function () {s.compile().eval(scope)}, Error);
   });
 
   it ('should compile a SymbolNode', function () {
-    var s = new SymbolNode('a');
+    var s = new SymbolNode(math, 'a');
 
-    var expr = s.compile(math);
+    var expr = s.compile();
     var scope = {a: 5};
     assert.equal(expr.eval(scope), 5);
     assert.throws(function () {expr.eval({})}, Error);
 
-    var s2 = new SymbolNode('sqrt');
-    var expr2 = s2.compile(math);
+    var s2 = new SymbolNode(math, 'sqrt');
+    var expr2 = s2.compile();
     var scope2 = {};
     assert.strictEqual(expr2.eval(scope2), math.sqrt);
   });
 
   it ('should filter a SymbolNode', function () {
-    var n = new SymbolNode('x');
+    var n = new SymbolNode(math, 'x');
     assert.deepEqual(n.filter(function (node) {return node instanceof SymbolNode}),  [n]);
     assert.deepEqual(n.filter(function (node) {return node.name == 'x'}),  [n]);
     assert.deepEqual(n.filter(function (node) {return node.name == 'q'}),  []);
@@ -53,15 +53,15 @@ describe('SymbolNode', function() {
   });
 
   it ('should run forEach on a SymbolNode', function () {
-    var a = new SymbolNode('a');
+    var a = new SymbolNode(math, 'a');
     a.forEach(function () {
       assert.ok(false, 'should not execute, symbol has no childs')
     });
   });
 
   it ('should map a SymbolNode', function () {
-    var a = new SymbolNode('a');
-    var c = new SymbolNode('c');
+    var a = new SymbolNode(math, 'a');
+    var c = new SymbolNode(math, 'c');
     var b = a.map(function () {
       assert.ok(false, 'should not execute, symbol has no childs')
     });
@@ -71,8 +71,8 @@ describe('SymbolNode', function() {
   });
 
   it ('should transform a SymbolNode', function () {
-    var a = new SymbolNode('x');
-    var b = new SymbolNode('y');
+    var a = new SymbolNode(math, 'x');
+    var b = new SymbolNode(math, 'y');
     var c = a.transform(function (node) {
       return node instanceof SymbolNode && node.name == 'x' ? b : node;
     });
@@ -86,7 +86,7 @@ describe('SymbolNode', function() {
   });
 
   it ('should clone a SymbolNode', function () {
-    var a = new SymbolNode('x');
+    var a = new SymbolNode(math, 'x');
     var b = a.clone();
 
     assert(b instanceof SymbolNode);
@@ -96,13 +96,13 @@ describe('SymbolNode', function() {
   });
 
   it ('should stringify a SymbolNode', function () {
-    var s = new SymbolNode('foo');
+    var s = new SymbolNode(math, 'foo');
 
     assert.equal(s.toString(), 'foo');
   });
 
   it ('should LaTeX a SymbolNode', function () {
-    var s = new SymbolNode('foo');
+    var s = new SymbolNode(math, 'foo');
 
     assert.equal(s.toTex(), 'foo');
   });

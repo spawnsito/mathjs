@@ -79,18 +79,11 @@ describe('Node', function() {
     assert.equal(node.toTex(), '');
   });
 
-  it ('should throw an error in case of wrong arguments for compile', function () {
-    var node = new Node();
-    assert.throws(function () {
-      node.compile()
-    }, /Object expected/);
-  });
-
   it ('should throw an error when compiling an abstract node', function () {
     var node = new Node();
     assert.throws(function () {
-      node.compile(math)
-    }, /Cannot compile a Node interface/);
+      node.compile()
+    }, /math is undefined/);
   });
 
   it ('should have an identifier', function () {

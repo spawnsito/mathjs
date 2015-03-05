@@ -1,4 +1,5 @@
 var assert = require('assert');
+var math = require('../../index');
 var operators = require('../../lib/expression/operators');
 var OperatorNode = require('../../lib/expression/node/OperatorNode');
 var AssignmentNode = require('../../lib/expression/node/AssignmentNode');
@@ -7,11 +8,11 @@ var Node = require('../../lib/expression/node/Node');
 
 describe('operators', function () {
   it('should return the precedence of a node', function () {
-    var a = new ConstantNode(1);
-    var b = new ConstantNode(2);
+    var a = new ConstantNode(math, 1);
+    var b = new ConstantNode(math, 2);
 
-    var n1 = new AssignmentNode('a', a);
-    var n2 = new OperatorNode('or', 'or', [a, b]);
+    var n1 = new AssignmentNode(math, 'a', a);
+    var n2 = new OperatorNode(math, 'or', 'or', [a, b]);
 
     assert.equal(operators.getPrecedence(n1), 0);
     assert.equal(operators.getPrecedence(n2), 2);
@@ -24,12 +25,12 @@ describe('operators', function () {
   });
 
   it('should return the associativity of a node', function () {
-    var a = new ConstantNode(1);
+    var a = new ConstantNode(math, 1);
 
-    var n1 = new OperatorNode('+', 'add', [a, a]);
-    var n2 = new OperatorNode('^', 'pow', [a, a]);
-    var n3 = new OperatorNode('-', 'unaryMinus', [a]);
-    var n4 = new OperatorNode('!', 'factorial', [a]);
+    var n1 = new OperatorNode(math, '+', 'add', [a, a]);
+    var n2 = new OperatorNode(math, '^', 'pow', [a, a]);
+    var n3 = new OperatorNode(math, '-', 'unaryMinus', [a]);
+    var n4 = new OperatorNode(math, '!', 'factorial', [a]);
 
     assert.equal(operators.getAssociativity(n1), 'left');
     assert.equal(operators.getAssociativity(n2), 'right');
@@ -38,20 +39,20 @@ describe('operators', function () {
   });
 
   it('should return null if associativity is not defined for a node', function () {
-    var a = new ConstantNode(1);
+    var a = new ConstantNode(math, 1);
 
     var n1 = new Node();
-    var n2 = new AssignmentNode('a', a);
+    var n2 = new AssignmentNode(math, 'a', a);
 
     assert.equal(operators.getAssociativity(n1), null);
     assert.equal(operators.getAssociativity(n2), null);
   });
 
   it('should return if a Node is associative with another Node', function () {
-    var a = new ConstantNode(1);
+    var a = new ConstantNode(math, 1);
 
-    var n1 = new OperatorNode('+', 'add', [a, a]);
-    var n2 = new OperatorNode('-', 'subtract', [a, a]);
+    var n1 = new OperatorNode(math, '+', 'add', [a, a]);
+    var n2 = new OperatorNode(math, '-', 'subtract', [a, a]);
 
     assert.equal(operators.isAssociativeWith(n1, n1), true);
     assert.equal(operators.isAssociativeWith(n1, n2), true);
@@ -63,7 +64,7 @@ describe('operators', function () {
     var a = new ConstantNode(1);
 
     var n1 = new Node();
-    var n2 = new AssignmentNode('a', a);
+    var n2 = new AssignmentNode(math, 'a', a);
 
     assert.equal(operators.isAssociativeWith(n1, n1), null);
     assert.equal(operators.isAssociativeWith(n1, n2), null);

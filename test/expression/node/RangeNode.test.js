@@ -11,46 +11,46 @@ var assert = require('assert'),
 describe('RangeNode', function() {
 
   it ('should create a RangeNode', function () {
-    var start = new ConstantNode(0);
-    var end = new ConstantNode(10);
-    var n = new RangeNode(start, end);
+    var start = new ConstantNode(math, 0);
+    var end = new ConstantNode(math, 10);
+    var n = new RangeNode(math, start, end);
     assert(n instanceof RangeNode);
     assert(n instanceof Node);
     assert.equal(n.type, 'RangeNode');
   });
 
   it ('should throw an error when calling without new operator', function () {
-    var start = new ConstantNode(0);
-    var end = new ConstantNode(10);
-    assert.throws(function () {RangeNode([start, end])}, SyntaxError);
+    var start = new ConstantNode(math, 0);
+    var end = new ConstantNode(math, 10);
+    assert.throws(function () {RangeNode(math, [start, end])}, SyntaxError);
   });
 
   it ('should throw an error creating a RangeNode with wrong number or type of arguments', function () {
-    var start = new ConstantNode(0);
-    var end = new ConstantNode(10);
+    var start = new ConstantNode(math, 0);
+    var end = new ConstantNode(math, 10);
 
-    assert.throws(function () { new RangeNode(); }, TypeError);
-    assert.throws(function () { new RangeNode(start); }, TypeError);
-    assert.throws(function () { new RangeNode([]); }, TypeError);
-    assert.throws(function () { new RangeNode(start, end, start, end); }, Error);
-    assert.throws(function () { new RangeNode(0, 10); }, TypeError);
+    assert.throws(function () { new RangeNode(math); }, TypeError);
+    assert.throws(function () { new RangeNode(math, start); }, TypeError);
+    assert.throws(function () { new RangeNode(math, []); }, TypeError);
+    assert.throws(function () { new RangeNode(math, start, end, start, end); }, Error);
+    assert.throws(function () { new RangeNode(math, 0, 10); }, TypeError);
   });
 
   it ('should compile a RangeNode', function () {
-    var start = new ConstantNode(0);
-    var end = new ConstantNode(10);
-    var step = new ConstantNode(2);
-    var n = new RangeNode(start, end, step);
+    var start = new ConstantNode(math, 0);
+    var end = new ConstantNode(math, 10);
+    var step = new ConstantNode(math, 2);
+    var n = new RangeNode(math, start, end, step);
 
-    var expr = n.compile(math);
+    var expr = n.compile();
     assert.deepEqual(expr.eval(), math.matrix([0, 2, 4, 6, 8, 10]));
   });
 
   it ('should filter a RangeNode', function () {
-    var start = new ConstantNode(0);
-    var end = new ConstantNode(10);
-    var step = new ConstantNode(2);
-    var n = new RangeNode(start, end, step);
+    var start = new ConstantNode(math, 0);
+    var end = new ConstantNode(math, 10);
+    var step = new ConstantNode(math, 2);
+    var n = new RangeNode(math, start, end, step);
 
     assert.deepEqual(n.filter(function (node) {return node instanceof RangeNode}),  [n]);
     assert.deepEqual(n.filter(function (node) {return node instanceof SymbolNode}),  []);
@@ -60,10 +60,10 @@ describe('RangeNode', function() {
   });
 
   it ('should run forEach on a RangeNode', function () {
-    var start = new ConstantNode(0);
-    var end = new ConstantNode(10);
-    var step = new ConstantNode(2);
-    var n = new RangeNode(start, end, step);
+    var start = new ConstantNode(math, 0);
+    var end = new ConstantNode(math, 10);
+    var step = new ConstantNode(math, 2);
+    var n = new RangeNode(math, start, end, step);
 
     var nodes = [];
     var paths = [];
@@ -81,14 +81,14 @@ describe('RangeNode', function() {
   });
 
   it ('should map a RangeNode', function () {
-    var start = new ConstantNode(0);
-    var end = new ConstantNode(10);
-    var step = new ConstantNode(2);
-    var n = new RangeNode(start, end, step);
+    var start = new ConstantNode(math, 0);
+    var end = new ConstantNode(math, 10);
+    var step = new ConstantNode(math, 2);
+    var n = new RangeNode(math, start, end, step);
 
     var nodes = [];
     var paths = [];
-    var e = new ConstantNode(3);
+    var e = new ConstantNode(math, 3);
     var f = n.map(function (node, path, parent) {
       nodes.push(node);
       paths.push(path);
@@ -110,10 +110,10 @@ describe('RangeNode', function() {
   });
 
   it ('should throw an error when the map callback does not return a node', function () {
-    var start = new ConstantNode(0);
-    var end = new ConstantNode(10);
-    var step = new ConstantNode(2);
-    var n = new RangeNode(start, end, step);
+    var start = new ConstantNode(math, 0);
+    var end = new ConstantNode(math, 10);
+    var step = new ConstantNode(math, 2);
+    var n = new RangeNode(math, start, end, step);
 
     assert.throws(function () {
       n.map(function () {});
@@ -121,12 +121,12 @@ describe('RangeNode', function() {
   });
 
   it ('should transform a RangeNodes start', function () {
-    var start = new ConstantNode(0);
-    var end = new ConstantNode(10);
-    var step = new ConstantNode(2);
-    var n = new RangeNode(start, end, step);
+    var start = new ConstantNode(math, 0);
+    var end = new ConstantNode(math, 10);
+    var step = new ConstantNode(math, 2);
+    var n = new RangeNode(math, start, end, step);
 
-    var e = new ConstantNode(3);
+    var e = new ConstantNode(math, 3);
     var f = n.transform(function (node) {
       return node instanceof ConstantNode && node.value == '0' ? e : node;
     });
@@ -138,12 +138,12 @@ describe('RangeNode', function() {
   });
 
   it ('should transform a RangeNodes end', function () {
-    var start = new ConstantNode(0);
-    var end = new ConstantNode(10);
-    var step = new ConstantNode(2);
-    var n = new RangeNode(start, end, step);
+    var start = new ConstantNode(math, 0);
+    var end = new ConstantNode(math, 10);
+    var step = new ConstantNode(math, 2);
+    var n = new RangeNode(math, start, end, step);
 
-    var e = new ConstantNode(3);
+    var e = new ConstantNode(math, 3);
     var f = n.transform(function (node) {
       return node instanceof ConstantNode && node.value == '10' ? e : node;
     });
@@ -155,12 +155,12 @@ describe('RangeNode', function() {
   });
 
   it ('should transform a RangeNodes step', function () {
-    var start = new ConstantNode(0);
-    var end = new ConstantNode(10);
-    var step = new ConstantNode(2);
-    var n = new RangeNode(start, end, step);
+    var start = new ConstantNode(math, 0);
+    var end = new ConstantNode(math, 10);
+    var step = new ConstantNode(math, 2);
+    var n = new RangeNode(math, start, end, step);
 
-    var e = new ConstantNode(3);
+    var e = new ConstantNode(math, 3);
     var f = n.transform(function (node) {
       return node instanceof ConstantNode && node.value == '2' ? e : node;
     });
@@ -172,11 +172,11 @@ describe('RangeNode', function() {
   });
 
   it ('should transform a RangeNodes without step', function () {
-    var start = new ConstantNode(0);
-    var end = new ConstantNode(10);
-    var n = new RangeNode(start, end);
+    var start = new ConstantNode(math, 0);
+    var end = new ConstantNode(math, 10);
+    var n = new RangeNode(math, start, end);
 
-    var e = new ConstantNode(3);
+    var e = new ConstantNode(math, 3);
     var f = n.transform(function (node) {
       return node instanceof ConstantNode && node.value == '10' ? e : node;
     });
@@ -187,12 +187,12 @@ describe('RangeNode', function() {
   });
 
   it ('should transform a RangeNode itself', function () {
-    var start = new ConstantNode(0);
-    var end = new ConstantNode(10);
-    var step = new ConstantNode(2);
-    var n = new RangeNode(start, end, step);
+    var start = new ConstantNode(math, 0);
+    var end = new ConstantNode(math, 10);
+    var step = new ConstantNode(math, 2);
+    var n = new RangeNode(math, start, end, step);
 
-    var e = new ConstantNode(5);
+    var e = new ConstantNode(math, 5);
     var f = n.transform(function (node) {
       return node instanceof RangeNode ? e : node;
     });
@@ -201,10 +201,10 @@ describe('RangeNode', function() {
   });
 
   it ('should clone a RangeNode', function () {
-    var start = new ConstantNode(0);
-    var end = new ConstantNode(10);
-    var step = new ConstantNode(2);
-    var c = new RangeNode(start, end, step);
+    var start = new ConstantNode(math, 0);
+    var end = new ConstantNode(math, 10);
+    var step = new ConstantNode(math, 2);
+    var c = new RangeNode(math, start, end, step);
 
     var d = c.clone();
 
@@ -216,9 +216,9 @@ describe('RangeNode', function() {
   });
 
   it ('should clone a RangeNode without step', function () {
-    var start = new ConstantNode(0);
-    var end = new ConstantNode(10);
-    var c = new RangeNode(start, end);
+    var start = new ConstantNode(math, 0);
+    var end = new ConstantNode(math, 10);
+    var c = new RangeNode(math, start, end);
 
     var d = c.clone();
 
@@ -232,59 +232,59 @@ describe('RangeNode', function() {
   });
 
   it ('should stringify a RangeNode without step', function () {
-    var start = new ConstantNode(0);
-    var end = new ConstantNode(10);
-    var n = new RangeNode(start, end);
+    var start = new ConstantNode(math, 0);
+    var end = new ConstantNode(math, 10);
+    var n = new RangeNode(math, start, end);
 
     assert.equal(n.toString(), '0:10');
   });
 
   it ('should stringify a RangeNode with step', function () {
-    var start = new ConstantNode(0);
-    var end = new ConstantNode(10);
-    var step = new ConstantNode(2);
-    var n = new RangeNode(start, end, step);
+    var start = new ConstantNode(math, 0);
+    var end = new ConstantNode(math, 10);
+    var step = new ConstantNode(math, 2);
+    var n = new RangeNode(math, start, end, step);
 
     assert.equal(n.toString(), '0:2:10');
   });
   
   it ('should stringify a RangeNode with an OperatorNode', function () {
-    var a = new ConstantNode(1);
-    var b = new ConstantNode(2);
+    var a = new ConstantNode(math, 1);
+    var b = new ConstantNode(math, 2);
 
-    var o1 = new OperatorNode('+', 'add', [a, b]);
-    var o2 = new OperatorNode('<', 'smaller', [a, b]);
+    var o1 = new OperatorNode(math, '+', 'add', [a, b]);
+    var o2 = new OperatorNode(math, '<', 'smaller', [a, b]);
 
-    var n = new RangeNode(o1, o1, o2);
+    var n = new RangeNode(math, o1, o1, o2);
 
     assert.equal(n.toString(), '1 + 2:(1 < 2):1 + 2');
   });
 
   it ('should stringify a RangeNode with a RangeNode', function () {
-    var start1 = new ConstantNode(0);
-    var end1 = new ConstantNode(10);
-    var step2 = new ConstantNode(2);
-    var end2 = new ConstantNode(100);
+    var start1 = new ConstantNode(math, 0);
+    var end1 = new ConstantNode(math, 10);
+    var step2 = new ConstantNode(math, 2);
+    var end2 = new ConstantNode(math, 100);
 
-    var start2 = new RangeNode(start1, end1);
-    var n = new RangeNode(start2, end2, step2);
+    var start2 = new RangeNode(math, start1, end1);
+    var n = new RangeNode(math, start2, end2, step2);
 
     assert.equal(n.toString(), '(0:10):2:100');
   });
 
   it ('should LaTeX a RangeNode without step', function () {
-    var start = new ConstantNode(0);
-    var end = new ConstantNode(10);
-    var n = new RangeNode(start, end);
+    var start = new ConstantNode(math, 0);
+    var end = new ConstantNode(math, 10);
+    var n = new RangeNode(math, start, end);
 
     assert.equal(n.toTex(), '0:10');
   });
 
   it ('should LaTeX a RangeNode with step', function () {
-    var start = new ConstantNode(0);
-    var end = new ConstantNode(10);
-    var step = new ConstantNode(2);
-    var n = new RangeNode(start, end, step);
+    var start = new ConstantNode(math, 0);
+    var end = new ConstantNode(math, 10);
+    var step = new ConstantNode(math, 2);
+    var n = new RangeNode(math, start, end, step);
 
     assert.equal(n.toTex(), '0:2:10');
   });

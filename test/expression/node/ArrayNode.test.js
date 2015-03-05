@@ -11,9 +11,9 @@ var assert = require('assert'),
 describe('ArrayNode', function() {
 
   it ('should create an ArrayNode', function () {
-    var c = new ConstantNode(1);
-    var a = new ArrayNode([c]);
-    var b = new ArrayNode([]);
+    var c = new ConstantNode(math, 1);
+    var a = new ArrayNode(math, [c]);
+    var b = new ArrayNode(math, []);
     assert(a instanceof ArrayNode);
     assert(b instanceof ArrayNode);
     assert.equal(a.type, 'ArrayNode');
@@ -21,57 +21,55 @@ describe('ArrayNode', function() {
   });
 
   it ('should throw an error when calling without new operator', function () {
-    assert.throws(function () {ArrayNode()}, SyntaxError);
+    assert.throws(function () {ArrayNode(math)}, SyntaxError);
   });
 
   it ('should throw an error on wrong constructor arguments', function () {
-    assert.throws(function () {new ArrayNode(2)}, TypeError);
-    assert.throws(function () {new ArrayNode([2, 3])}, TypeError);
+    assert.throws(function () {new ArrayNode(math, 2)}, TypeError);
+    assert.throws(function () {new ArrayNode(math, [2, 3])}, TypeError);
   });
 
   it ('should evaluate an ArrayNode', function () {
-    var c = new ConstantNode(1);
-    var a = new ArrayNode([c]);
-    var b = new ArrayNode();
+    var c = new ConstantNode(math, 1);
+    var a = new ArrayNode(math, [c]);
+    var b = new ArrayNode(math);
 
-    assert.deepEqual(a.compile(math).eval(), math.matrix([1]));
-    assert.deepEqual(b.compile(math).eval(), math.matrix([]));
+    assert.deepEqual(a.compile().eval(), math.matrix([1]));
+    assert.deepEqual(b.compile().eval(), math.matrix([]));
   });
 
   it ('should compile an ArrayNode', function () {
-    var a = new ConstantNode(1);
-    var b = new ConstantNode(2);
-    var c = new ConstantNode(3);
-    var d = new ConstantNode(4);
-    var n = new ArrayNode([a, b, c, d]);
-
-    var expr = n.compile(math);
-    assert.deepEqual(expr.eval(), math.matrix([1,2,3,4]));
-
     var mathArray = math.create({matrix: 'array'});
-    var expr2 = n.compile(mathArray);
+
+    var a = new ConstantNode(mathArray, 1);
+    var b = new ConstantNode(mathArray, 2);
+    var c = new ConstantNode(mathArray, 3);
+    var d = new ConstantNode(mathArray, 4);
+    var n = new ArrayNode(mathArray, [a, b, c, d]);
+
+    var expr2 = n.compile();
     assert.deepEqual(expr2.eval(), [1,2,3,4]);
   });
 
   it ('should compile nested ArrayNodes', function () {
-    var a = new ConstantNode(1);
-    var b = new ConstantNode(2);
-    var c = new ConstantNode(3);
-    var d = new ConstantNode(4);
+    var a = new ConstantNode(math, 1);
+    var b = new ConstantNode(math, 2);
+    var c = new ConstantNode(math, 3);
+    var d = new ConstantNode(math, 4);
 
-    var n2 = new ArrayNode([a, b]);
-    var n3 = new ArrayNode([c, d]);
-    var n4 = new ArrayNode([n2, n3]);
+    var n2 = new ArrayNode(math, [a, b]);
+    var n3 = new ArrayNode(math, [c, d]);
+    var n4 = new ArrayNode(math, [n2, n3]);
 
-    var expr = n4.compile(math);
+    var expr = n4.compile();
     assert.deepEqual(expr.eval(), math.matrix([[1,2],[3,4]]));
   });
 
   it ('should find an ArrayNode', function () {
-    var a = new ConstantNode(1);
-    var b = new SymbolNode('x');
-    var c = new ConstantNode(2);
-    var d = new ArrayNode([a, b, c]);
+    var a = new ConstantNode(math, 1);
+    var b = new SymbolNode(math, 'x');
+    var c = new ConstantNode(math, 2);
+    var d = new ArrayNode(math, [a, b, c]);
 
     assert.deepEqual(d.filter(function (node) {return node instanceof ArrayNode}),     [d]);
     assert.deepEqual(d.filter(function (node) {return node instanceof SymbolNode}),    [b]);
@@ -82,11 +80,11 @@ describe('ArrayNode', function() {
 
   it ('should run forEach on an ArrayNode', function () {
     // [x, 2]
-    var a = new SymbolNode('x');
-    var b = new ConstantNode(2);
-    var c = new ArrayNode([a, b]);
+    var a = new SymbolNode(math, 'x');
+    var b = new ConstantNode(math, 2);
+    var c = new ArrayNode(math, [a, b]);
 
-    var d = new ConstantNode(3);
+    var d = new ConstantNode(math, 3);
     var nodes = [];
     var paths = [];
     c.forEach(function (node, path, parent) {
@@ -103,11 +101,11 @@ describe('ArrayNode', function() {
 
   it ('should map an ArrayNode', function () {
     // [x, 2]
-    var a = new SymbolNode('x');
-    var b = new ConstantNode(2);
-    var c = new ArrayNode([a, b]);
+    var a = new SymbolNode(math, 'x');
+    var b = new ConstantNode(math, 2);
+    var c = new ArrayNode(math, [a, b]);
 
-    var d = new ConstantNode(3);
+    var d = new ConstantNode(math, 3);
     var nodes = [];
     var paths = [];
     var e = c.map(function (node, path, parent) {
@@ -129,9 +127,9 @@ describe('ArrayNode', function() {
   });
 
   it ('should throw an error when the map callback does not return a node', function () {
-    var a = new SymbolNode('x');
-    var b = new ConstantNode(2);
-    var c = new ArrayNode([a, b]);
+    var a = new SymbolNode(math, 'x');
+    var b = new ConstantNode(math, 2);
+    var c = new ArrayNode(math, [a, b]);
 
     assert.throws(function () {
       c.map(function () {});
@@ -140,11 +138,11 @@ describe('ArrayNode', function() {
 
   it ('should transform an ArrayNodes parameters', function () {
     // [x, 2]
-    var a = new SymbolNode('x');
-    var b = new ConstantNode(2);
-    var c = new ArrayNode([a, b]);
+    var a = new SymbolNode(math, 'x');
+    var b = new ConstantNode(math, 2);
+    var c = new ArrayNode(math, [a, b]);
 
-    var d = new ConstantNode(3);
+    var d = new ConstantNode(math, 3);
     var e = c.transform(function (node) {
       return (node instanceof SymbolNode) && (node.name == 'x') ? d : node;
     });
@@ -156,11 +154,11 @@ describe('ArrayNode', function() {
 
   it ('should transform an ArrayNode itself', function () {
     // [x, 2]
-    var a = new SymbolNode('x');
-    var b = new ConstantNode(2);
-    var c = new ArrayNode([a, b]);
+    var a = new SymbolNode(math, 'x');
+    var b = new ConstantNode(math, 2);
+    var c = new ArrayNode(math, [a, b]);
 
-    var d = new ConstantNode(3);
+    var d = new ConstantNode(math, 3);
     var e = c.transform(function (node) {
       return (node instanceof ArrayNode) ? d : node;
     });
@@ -168,9 +166,9 @@ describe('ArrayNode', function() {
   });
 
   it ('should traverse an ArrayNode', function () {
-    var a = new ConstantNode(1);
-    var b = new ConstantNode(2);
-    var c = new ArrayNode([a, b]);
+    var a = new ConstantNode(math, 1);
+    var b = new ConstantNode(math, 2);
+    var c = new ArrayNode(math, [a, b]);
 
     var count = 0;
     c.traverse(function (node, path, parent) {
@@ -202,9 +200,9 @@ describe('ArrayNode', function() {
 
   it ('should clone an ArrayNode', function () {
     // [x, 2]
-    var a = new SymbolNode('x');
-    var b = new ConstantNode(2);
-    var c = new ArrayNode([a, b]);
+    var a = new SymbolNode(math, 'x');
+    var b = new ConstantNode(math, 2);
+    var c = new ArrayNode(math, [a, b]);
 
     var d = c.clone();
     assert(d instanceof ArrayNode);
@@ -215,23 +213,23 @@ describe('ArrayNode', function() {
   });
 
   it ('should stringify an ArrayNode', function () {
-    var a = new ConstantNode(1);
-    var b = new ConstantNode(2);
-    var c = new ConstantNode(3);
-    var d = new ConstantNode(4);
-    var n = new ArrayNode([a, b, c, d]);
+    var a = new ConstantNode(math, 1);
+    var b = new ConstantNode(math, 2);
+    var c = new ConstantNode(math, 3);
+    var d = new ConstantNode(math, 4);
+    var n = new ArrayNode(math, [a, b, c, d]);
 
     assert.equal(n.toString(), '[1, 2, 3, 4]');
   });
 
   it ('should LaTeX an ArrayNode', function () {
-    var a = new ConstantNode(1);
-    var b = new ConstantNode(2);
-    var c = new ConstantNode(3);
-    var d = new ConstantNode(4);
-    var v1 = new ArrayNode([a, b]);
-    var v2 = new ArrayNode([c, d]);
-    var n = new ArrayNode([v1, v2]);
+    var a = new ConstantNode(math, 1);
+    var b = new ConstantNode(math, 2);
+    var c = new ConstantNode(math, 3);
+    var d = new ConstantNode(math, 4);
+    var v1 = new ArrayNode(math, [a, b]);
+    var v2 = new ArrayNode(math, [c, d]);
+    var n = new ArrayNode(math, [v1, v2]);
 
     assert.equal(n.toTex(), '\\begin{bmatrix}1&2\\\\3&4\\\\\\end{bmatrix}');
   });
