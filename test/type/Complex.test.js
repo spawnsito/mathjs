@@ -139,7 +139,7 @@ describe('Complex', function () {
       assertComplex(Complex.parse(' 2+3i '), 2, 3);
       assertComplex(Complex.parse('2-3i'), 2, -3);
       assertComplex(Complex.parse('2 + i'), 2, 1);
-      
+
       assertComplex(Complex.parse('-2-3i'), -2, - 3);
       assertComplex(Complex.parse('-2+3i'), -2, 3);
       assertComplex(Complex.parse('-2+-3i'), -2, -3);
